@@ -72,7 +72,7 @@ const server = net.createServer((socket) => {
             }
 
             if (meta.telegramMessage) {
-                await sendTelegramMessage(meta.telegramMessage);
+                // await sendTelegramMessage(meta.telegramMessage);
             }
 
           } catch (error) {
