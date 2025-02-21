@@ -6,6 +6,9 @@ const StandardPriceController = require('./controllers/StandardPriceController')
 const DiffPriceController = require('./controllers/DiffPriceController');
 const OrderController = require('./controllers/OrderController');
 
+// Task
+require('./tasks/cleanup');
+
 // Định nghĩa route
 const routes = {
   "/standard-price/create": StandardPriceController.create,
@@ -33,8 +36,8 @@ const routes = {
   
   // Thêm controller khác nếu cần...
 };
-// const modeForce = { force: true };
-const modeForce = {};
+const modeForce = { force: true };
+// const modeForce = {};
 
 sequelize.sync(modeForce)
     .then(() => console.log("✅ Kết nối MySQL thành công!"))
@@ -48,10 +51,9 @@ const server = net.createServer((socket) => {
 
   socket.on('data', async (data) => {
     try {
-      // let startTime = Date.now();  // Bắt đầu đo thời gian
         const request = JSON.parse(data.toString().trim());
         // console.log('Received:', request);
-
+        // console.time('executionTime');  // Bắt đầu đo thời gian node
         const handler = routes[request.path];
         if (!handler) {
           socket.write(JSON.stringify({ status: 404, message: "Route not found" }));
@@ -62,15 +64,14 @@ const server = net.createServer((socket) => {
         
         // ✅ Trả về response ngay lập tức
         socket.write(JSON.stringify(response));
-
+        // console.timeEnd('executionTime');
         // ✅ Xử lý các tác vụ nền dựa trên meta
         setImmediate(async () => {
           try {
-            if (meta.deletePriceRecord) {
-                await StandardPriceController.deleteOldRecords();
-                await DiffPriceController.deleteOldRecords();
-            }
-
+            // if (meta.deletePriceRecord) {
+            //   await StandardPriceController.deleteOldRecords();
+            //   await DiffPriceController.deleteOldRecords();
+            // }
             if (meta.telegramMessage) {
                 // await sendTelegramMessage(meta.telegramMessage);
             }
@@ -100,7 +101,7 @@ const server = net.createServer((socket) => {
 
 // Lắng nghe trên cổng 4000
 server.listen(process.env.PORT, '127.0.0.1', () => {
-  console.log('Server running on port 4000');
+  console.log(`Server running on 127.0.0.1:${process.env.PORT}`);
 });
 
 // Hàm gửi thông báo lên Telegram
@@ -120,9 +121,3 @@ async function sendTelegramMessage(message) {
   }
 }
 
-// const a = {
-//   command: "TrackData",
-//   data: {
-//     "Symbol":  
-//   }
-// }

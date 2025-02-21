@@ -22,7 +22,13 @@ const DiffPrice = sequelize.define("DiffPrice", {
     timestamps: false,
     indexes: [
         { fields: ["server_code"] },
-        { fields: ["account"] }
+        { fields: ["created_at"] },
+        { 
+            fields: [
+              "account",
+              { name: "created_at", order: "DESC" }
+            ]
+          }
     ]
 });
 
@@ -30,8 +36,8 @@ DiffPrice.getLastestRecordByAccount = async function(acountId) {
     try {
         const record = await this.findOne({
             where: { account: acountId },
-            order: [['createdAt', 'DESC']] // Sắp xếp lấy record mới nhất
-            // ,logging: console.log
+            order: [['id', 'DESC']] // Sắp xếp lấy record mới nhất
+            // ,logging: console.log   //lấy ra câu sql
         });
 
         return record;

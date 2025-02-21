@@ -30,8 +30,9 @@ StandardPrice.getLastestRecordByAccount = async function(acountId) {
     try {
         const record = await this.findOne({
             where: { account: acountId },
-            order: [['createdAt', 'DESC']] // Sắp xếp lấy record cũ nhất
-            // ,logging: console.log
+            order: [['id', 'DESC']] // Sắp xếp lấy record cũ nhất
+            // order: [['createdAt', 'DESC']] // Sắp xếp lấy record cũ nhất
+            // ,logging: console.log   //lấy ra câu sql
         });
 
         return record;
