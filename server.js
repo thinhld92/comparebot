@@ -43,7 +43,7 @@ const server = net.createServer((socket) => {
     try {
         const request = JSON.parse(data.toString().trim());
         // console.log('Received:', request);
-        console.time('handler');  // Bắt đầu đo thời gian node
+        // console.time('handler');  // Bắt đầu đo thời gian node
         const handler = routes[request.path];
         if (!handler) {
           socket.write(JSON.stringify({ status: 404, message: "Route not found" }));
@@ -54,7 +54,7 @@ const server = net.createServer((socket) => {
         
         // ✅ Trả về response ngay lập tức
         socket.write(JSON.stringify(response));
-        console.timeEnd('handler');
+        // console.timeEnd('handler');
         // socket.end();
         // ✅ Xử lý các tác vụ nền dựa trên meta
         setImmediate(async () => {
