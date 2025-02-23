@@ -4,8 +4,10 @@ const DiffPriceController = require('../controllers/DiffPriceController');
 
 async function deleteOldRecords() {
   try {
-    await StandardPriceController.deleteOldRecords();
-    await DiffPriceController.deleteOldRecords();
+    await Promise.all([
+      StandardPriceController.deleteOldRecords(),
+      DiffPriceController.deleteOldRecords()
+    ]);
     console.log(`Deleted old records older than 2 minutes at ${new Date().toLocaleTimeString()}`);
   } catch (error) {
     console.error("Error deleting old records:", error);

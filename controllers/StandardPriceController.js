@@ -6,7 +6,7 @@ const StandardPriceController = {
     create: async (data) => {        
         try {
             data.createdAt = new Date();
-            const newPrice = await StandardPrice.create(data);
+            const newPrice = await StandardPrice.create(data, { logging: false });
             return {
                 response: { status: 200, message: "Created Standard Price", id: newPrice.id },
                 meta: {}

@@ -6,7 +6,7 @@ const DiffPriceController = {
     create: async (data) => {        
         try {
             data.createdAt = new Date();
-            const newPrice = await DiffPrice.create(data);
+            const newPrice = await DiffPrice.create(data, { logging: false });
             return {
               response: { status: 200, message: "Created Diff Price", id: newPrice.id },
               meta: {deletePriceRecord: true}

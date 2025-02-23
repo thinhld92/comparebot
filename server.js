@@ -18,21 +18,10 @@ const routes = {
   // "/standard-price/delete": StandardPriceController.delete,
   
   "/diff-price/create": DiffPriceController.create,
-  // "/diff-price/read": DiffPriceController.readAll,
-  // "/diff-price/readById": DiffPriceController.readById,
-  // "/diff-price/update": DiffPriceController.update,
-  // "/diff-price/delete": DiffPriceController.delete,
 
   "/order/create": OrderController.create,
   "/order/position": OrderController.position,
   "/order/close": OrderController.closePosition,
-  
-  // Các route cho UserController (ví dụ)
-  // "/user/create": UserController.create,
-  // "/user/read": UserController.readAll,
-  // "/user/readById": UserController.readById,
-  // "/user/update": UserController.update,
-  // "/user/delete": UserController.delete,
   
   // Thêm controller khác nếu cần...
 };
@@ -47,13 +36,14 @@ sequelize.sync(modeForce)
 const server = net.createServer((socket) => {
   // console.log('MQL5 connected.');
   socket.setNoDelay(true)
+  socket.setTimeout(10000); // 10 giây không hoạt động thì đóng
   socket.setKeepAlive(true, 6000); // Giữ kết nối mở
 
   socket.on('data', async (data) => {
     try {
         const request = JSON.parse(data.toString().trim());
         // console.log('Received:', request);
-        // console.time('executionTime');  // Bắt đầu đo thời gian node
+        console.time('handler');  // Bắt đầu đo thời gian node
         const handler = routes[request.path];
         if (!handler) {
           socket.write(JSON.stringify({ status: 404, message: "Route not found" }));
@@ -64,7 +54,8 @@ const server = net.createServer((socket) => {
         
         // ✅ Trả về response ngay lập tức
         socket.write(JSON.stringify(response));
-        // console.timeEnd('executionTime');
+        console.timeEnd('handler');
+        // socket.end();
         // ✅ Xử lý các tác vụ nền dựa trên meta
         setImmediate(async () => {
           try {
@@ -83,7 +74,7 @@ const server = net.createServer((socket) => {
         
         
     } catch (e) {
-        socket.write(JSON.stringify({ status: 400, message: "Invalid request", error: error.message }));
+        socket.write(JSON.stringify({ status: 400, message: "Invalid request", error: e.message }));
     }
 
 });
@@ -93,15 +84,20 @@ const server = net.createServer((socket) => {
     // console.log('MQL5 disconnected.');
   });
 
-  // Xử lý lỗi
-  socket.on('error', (err) => {
-    console.error('Socket error:', err);
+   // Xử lý lỗi
+   socket.on('error', (err) => {
+    if (err.code === 'ECONNRESET') {
+      console.log('Client closed connection prematurely');
+    } else {
+      console.error('Socket error:', err);
+    }
   });
 });
 
 // Lắng nghe trên cổng 4000
-server.listen(process.env.PORT, '127.0.0.1', () => {
-  console.log(`Server running on 127.0.0.1:${process.env.PORT}`);
+const PORT = process.env.PORT || 4000;
+server.listen(PORT, '127.0.0.1', () => {
+  console.log(`Server running on 127.0.0.1:${PORT}`);
 });
 
 // Hàm gửi thông báo lên Telegram
@@ -120,4 +116,3 @@ async function sendTelegramMessage(message) {
     console.error('Error sending message to Telegram:', error);
   }
 }
-
